@@ -3,46 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Part Number Synchronization Demo</title>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #dddddd; text-align: left; padding: 8px; }
-        th { background-color: #f2f2f2; }
-    </style>
+    <title>Interactive Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <h1>Part Number Synchronization System</h1>
-    <p>This is a mock demo page to illustrate the functionalities of the part number synchronization system.</p>
-    <h2>Sample Data</h2>
-    <table>
-        <tr>
-            <th>Part Number</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Last Updated</th>
-        </tr>
-        <tr>
-            <td>PN-12345</td>
-            <td>Part Description 1</td>
-            <td>Active</td>
-            <td>2026-01-20 10:00:00</td>
-        </tr>
-        <tr>
-            <td>PN-67890</td>
-            <td>Part Description 2</td>
-            <td>Inactive</td>
-            <td>2026-01-19 15:30:00</td>
-        </tr>
-        <tr>
-            <td>PN-54321</td>
-            <td>Part Description 3</td>
-            <td>Active</td>
-            <td>2026-01-20 09:15:00</td>
-        </tr>
-    </table>
-    <h2>Instructions</h2>
-    <p>To synchronize part numbers, upload the relevant CSV file containing the part numbers and their descriptions.</p>
-    <p>Click <a href="#">here</a> to upload a file.</p>
+    <div class="container">
+        <h1>Interactive Demo</h1>
+        <form id="demoForm">
+            <label for="inputField">Input:</label>
+            <input type="text" id="inputField" required>
+            <div id="validationMessage"></div>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="results"></div>
+        <button id="importExcel">Import from Excel</button>
+        <input type="file" id="fileInput" style="display:none;">
+        <div id="searchContainer">
+            <input type="text" id="searchField" placeholder="Search...">
+            <button id="searchButton">Search</button>
+            <div id="searchResults"></div>
+        </div>
+    </div>
 </body>
 </html>
+
+<!-- Add styles and scripts for demo functionality -->
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .container { max-width: 600px; margin: auto; }
+    #validationMessage { color: red; }
+    #results { margin-top: 20px; }
+</style>
+
+<script>
+    document.getElementById('demoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const inputField = document.getElementById('inputField');
+        const validationMessage = document.getElementById('validationMessage');
+        validationMessage.innerText = '';
+
+        // Real-time validation
+        if (inputField.value.trim() === '') {
+            validationMessage.innerText = 'Input cannot be empty.';
+            return;
+        }
+
+        // Simulated database interaction
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML += `<p>${inputField.value}</p>`;
+        inputField.value = '';
+    });
+
+    document.getElementById('importExcel').addEventListener('click', function() {
+        document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        // Simulate Excel import
+        if (file) {
+            alert('Excel import simulation for: ' + file.name);
+        }
+    });
+
+    document.getElementById('searchButton').addEventListener('click', function() {
+        const searchField = document.getElementById('searchField');
+        const searchResults = document.getElementById('searchResults');
+        searchResults.innerHTML = `<p>Searching for: ${searchField.value}</p>`;
+    });
+</script>
