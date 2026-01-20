@@ -1,125 +1,37 @@
 # Part Number Synchronization System
 
-## 🎯 Overview
+## Overview
+The Part Number Synchronization System is designed to streamline and automate the process of syncing part numbers across various platforms and databases, ensuring consistency and accuracy in parts management.
 
-A real-time part number synchronization system for managing 8-digit part numbers across 3 company locations with 2 SQL Server databases.
+## Features
+- **Real-time Synchronization**: Automatic updates across all platforms when a part number changes.
+- **Error Handling**: Robust error handling to manage discrepancies in part number entries.
+- **User-friendly Interface**: Easy-to-navigate dashboard for monitoring sync status and logs.
+- **API Integration**: Seamless integration with existing systems via APIs.
 
-**Architecture:**
-- **Locations 1 & 2**: Share one SQL Server (Primary)
-- **Location 3**: Has its own SQL Server (Secondary)
+## Installation Steps
+1. Clone the repository: `git clone https://github.com/Bigschack77/part-number-sync-system.git`
+2. Navigate to the project directory: `cd part-number-sync-system`
+3. Install the required dependencies: `npm install`
+4. Configure the environment variables required for proper database connections.
+5. Run the application: `npm start`
 
-## ✨ Key Features
+## Usage Guide
+- To initiate synchronization, use the command: `sync start`.
+- For viewing logs, access the logs section on the dashboard.
+- Configure sync settings via the settings menu in the application.
 
-- ✅ Real-time duplicate prevention across both SQL Servers
-- ✅ Automatic synchronization between servers
-- ✅ Manual part number entry with instant validation
-- ✅ Excel/CSV import for bulk data migration
-- ✅ Search functionality across all locations
-- ✅ Full audit trail and history tracking
-- ✅ Web-based interface - no installation required
-- ✅ 8-digit numeric format validation
+## Database Schema
+The system utilizes a relational database with the following key tables:
+- **Parts**: Holds details like part number, description, and specifications.
+- **Sync Logs**: Tracks the sync operations, including timestamps and success/failure statuses.
 
-## 🚀 Quick Start
+## Sync Mechanism
+The synchronization mechanism uses a job scheduler to monitor part number changes at regular intervals and updates the databases accordingly. Notifications are sent out if any syncing issues occur.
 
-### Prerequisites
-
-- SQL Server 2016+ (both locations)
-- .NET 8.0 SDK
-- Web browser (Chrome, Edge, Firefox)
-
-### Installation Steps
-
-1. **Clone the repository:**
-```bash
-git clone https://github.com/Bigschack77/part-number-sync-system.git
-cd part-number-sync-system
-```
-
-2. **Set up databases on BOTH SQL Servers:**
-```sql
-CREATE DATABASE PartNumberDB;
-GO
-USE PartNumberDB;
-GO
-```
-
-3. **Run the SQL scripts in order on both servers:**
-   - Execute Database/01_CreateTables.sql
-   - Execute Database/02_SyncProcedures.sql
-   - Execute Database/03_SyncConfiguration.sql
-
-4. **Update connection strings in PartNumberAPI/appsettings.json**
-
-5. **Run the API:**
-```bash
-cd PartNumberAPI
-dotnet restore
-dotnet build
-dotnet run
-```
-
-## 📖 Usage Guide
-
-### Creating Part Numbers
-
-1. Navigate to Create Part Number tab
-2. Enter 8-digit part number
-3. System checks both servers for duplicates in real-time
-4. Fill in description and select location
-5. Click Create Part Number
-6. Part is saved and synced to both servers automatically
-
-### Importing from Excel
-
-1. Prepare Excel with columns: PartNumber, Description, Location
-2. Save as CSV
-3. Use the Import tab to upload
-4. Review import results
-
-### Searching
-
-Search across all locations and both SQL Servers simultaneously.
-
-## 🛡️ Data Validation
-
-- Must be exactly 8 digits
-- Numeric only
-- Unique across all 3 locations
-- Real-time duplicate checking
-
-## 📊 Database Schema
-
-### Tables
-- **PartNumbers**: Main part number storage
-- **SyncLog**: Synchronization tracking
-- **PartNumberHistory**: Complete audit trail
-- **SyncConfiguration**: Multi-server configuration
-
-## 🔧 How Sync Works
-
-1. User enters part number at any location
-2. API checks BOTH SQL Servers for duplicates
-3. If unique: Saves to appropriate server and replicates to the other
-4. If duplicate: Shows error with location details
-
-## 🎁 Business Benefits
-
-- ✅ Eliminates duplicate part number errors
-- ✅ Reduces manual coordination between locations
-- ✅ Speeds up part number creation process
-- ✅ Provides instant visibility across all locations
-- ✅ Maintains data integrity automatically
-
-## 📞 Support
-
-For questions or issues, create an issue on GitHub.
-
-## 📄 License
-
-Internal use only - Company Confidential
+## Business Benefits
+- Maintains data integrity across systems.
+- Reduces manual entry errors, leading to fewer discrepancies.
+- Saves time with automated updates, allowing businesses to focus on growth rather than data management.
 
 ---
-
-**Version**: 1.0  
-**Last Updated**: 2026-01-20 13:42:47  
-**Created By**: Bigschack77
