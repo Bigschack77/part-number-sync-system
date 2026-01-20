@@ -1,0 +1,13 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.suo
+
+# NuGet Packages
+*.nupkg
+# SQL Server files
+*.mdf
+*.ldf
+*.ndf
