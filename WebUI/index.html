@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Part Number Sync System</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .tab { display: none; }
+        .tab-content { padding: 20px; }
+        .tablinks { cursor: pointer; padding: 10px; background: #f1f1f1; border: none; }
+        .tablinks.active { background: #ccc; }
+    </style>
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";  
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";  
+            evt.currentTarget.className += " active";
+        }
+
+        function validatePartNumber(input) {
+            // Simple validation logic for example
+            let partNumber = input.value;
+            let feedback = document.getElementById("validationFeedback");
+            if (partNumber.match(/^\\d{5}-\\d{3}$/)) {
+                feedback.textContent = "Valid Part Number.";
+                feedback.style.color = "green";
+            } else {
+                feedback.textContent = "Invalid Part Number.";
+                feedback.style.color = "red";
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Part Number Sync System</h1>
+    <div>
+        <button class="tablinks" onclick="openTab(event, 'Create')">Create</button>
+        <button class="tablinks" onclick="openTab(event, 'Search')">Search</button>
+        <button class="tablinks" onclick="openTab(event, 'Import')">Import</button>
+    </div>
+
+    <div id="Create" class="tab tab-content">
+        <h2>Create Part Number</h2>
+        <input type="text" oninput="validatePartNumber(this)" placeholder="Enter Part Number (xxxxx-xxx)">
+        <div id="validationFeedback"></div>
+    </div>
+
+    <div id="Search" class="tab tab-content">
+        <h2>Search Part Number</h2>
+        <input type="text" placeholder="Search..."><
+        <!-- Implement search functionality here -->
+    </div>
+
+    <div id="Import" class="tab tab-content">
+        <h2>Import Excel File</h2>
+        <input type="file" accept=".xls,.xlsx">
+        <button>Upload</button>
+        <!-- Implement Excel import functionality here -->
+    </div>
+    
+    <script>
+        // Default open tab
+        document.querySelector(".tablinks").click();
+    </script>
+</body>
+</html>
