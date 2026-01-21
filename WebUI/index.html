@@ -10,8 +10,75 @@
         .tab-content { padding: 20px; }
         .tablinks { cursor: pointer; padding: 10px; background: #f1f1f1; border: none; }
         .tablinks.active { background: #ccc; }
+
+        /* Copy button styles */
+        .copy-btn {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 4px 8px;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s;
+            vertical-align: middle;
+        }
+
+        .copy-btn:hover {
+            background-color: #0b7dda;
+        }
+
+        .copy-btn.copied {
+            background-color: #4CAF50;
+        }
     </style>
     <script>
+        // Copy part number to clipboard
+        function copyPartNumber(partNumber, button) {
+            // Try modern Clipboard API first
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(partNumber).then(function() {
+                    showCopyFeedback(button);
+                }).catch(function(err) {
+                    // Fallback to older method
+                    fallbackCopy(partNumber, button);
+                });
+            } else {
+                // Fallback for older browsers
+                fallbackCopy(partNumber, button);
+            }
+        }
+
+        // Fallback copy method for older browsers
+        function fallbackCopy(partNumber, button) {
+            const textArea = document.createElement('textarea');
+            textArea.value = partNumber;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showCopyFeedback(button);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Show visual feedback for copy action
+        function showCopyFeedback(button) {
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            button.classList.add('copied');
+            setTimeout(function() {
+                button.textContent = originalText;
+                button.classList.remove('copied');
+            }, 1500);
+        }
+
         function openTab(evt, tabName) {
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tab");
