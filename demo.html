@@ -3,73 +3,752 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Demo</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
+    <title>Part Number Sync System - Demo</title>
+    <!-- SheetJS library for Excel parsing -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>Interactive Demo</h1>
-        <form id="demoForm">
-            <label for="inputField">Input:</label>
-            <input type="text" id="inputField" required>
-            <div id="validationMessage"></div>
-            <button type="submit">Submit</button>
-        </form>
-        <div id="results"></div>
-        <button id="importExcel">Import from Excel</button>
-        <input type="file" id="fileInput" style="display:none;">
-        <div id="searchContainer">
-            <input type="text" id="searchField" placeholder="Search...">
-            <button id="searchButton">Search</button>
+        <h1>Part Number Sync System - Demo</h1>
+        
+        <!-- Part Number Form -->
+        <div class="section">
+            <h2>Add Part Number</h2>
+            <form id="demoForm">
+                <div class="form-group">
+                    <label for="inputField">Part Number (8 digits):</label>
+                    <div class="input-with-validation">
+                        <input type="text" id="inputField" placeholder="e.g., 12345678" maxlength="8" required>
+                        <span id="validationIcon" class="validation-icon"></span>
+                    </div>
+                    <div id="validationMessage" class="validation-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="descriptionField">Description (optional):</label>
+                    <input type="text" id="descriptionField" placeholder="Part description">
+                </div>
+                <div class="form-group">
+                    <label for="locationField">Location:</label>
+                    <select id="locationField">
+                        <option value="Location 1">Location 1</option>
+                        <option value="Location 2">Location 2</option>
+                        <option value="Location 3">Location 3</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Part Number</button>
+            </form>
+        </div>
+
+        <!-- Excel Import Section -->
+        <div class="section">
+            <h2>Import from Excel</h2>
+            <p class="info-text">Upload an Excel file (.xlsx or .xls) with columns: Part Number, Description, Location</p>
+            <button id="importExcel" class="btn btn-secondary">Choose Excel File</button>
+            <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none;">
+            <div id="importProgress" class="progress-container" style="display:none;">
+                <div class="loading-spinner"></div>
+                <span>Processing Excel file...</span>
+            </div>
+            <div id="importResults" class="import-results"></div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="section">
+            <h2>Added Part Numbers</h2>
+            <div id="results" class="results-list">
+                <p class="empty-state">No part numbers added yet.</p>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="section">
+            <h2>Search</h2>
+            <div class="search-container">
+                <input type="text" id="searchField" placeholder="Search part numbers...">
+                <button id="searchButton" class="btn btn-primary">Search</button>
+            </div>
             <div id="searchResults"></div>
         </div>
     </div>
 </body>
 </html>
 
-<!-- Add styles and scripts for demo functionality -->
+<!-- Inline Styles -->
 <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    .container { max-width: 600px; margin: auto; }
-    #validationMessage { color: red; }
-    #results { margin-top: 20px; }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        padding: 30px;
+    }
+
+    h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 28px;
+    }
+
+    h2 {
+        color: #555;
+        margin-bottom: 15px;
+        font-size: 20px;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+    }
+
+    .section {
+        margin-bottom: 40px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 600;
+        color: #555;
+    }
+
+    input[type="text"],
+    select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus,
+    select:focus {
+        outline: none;
+        border-color: #667eea;
+    }
+
+    .input-with-validation {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .validation-icon {
+        position: absolute;
+        right: 12px;
+        font-size: 20px;
+    }
+
+    .validation-message {
+        margin-top: 5px;
+        font-size: 13px;
+        min-height: 18px;
+    }
+
+    .validation-message.success {
+        color: #28a745;
+    }
+
+    .validation-message.error {
+        color: #dc3545;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+
+    .info-text {
+        color: #666;
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .progress-container {
+        margin-top: 15px;
+        padding: 15px;
+        background: white;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .import-results {
+        margin-top: 20px;
+    }
+
+    .import-summary {
+        padding: 15px;
+        background: white;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .import-summary h3 {
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .summary-stats {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .stat {
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-weight: 600;
+    }
+
+    .stat.total {
+        background: #e7f1ff;
+        color: #004085;
+    }
+
+    .stat.success {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .stat.error {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .import-table {
+        width: 100%;
+        background: white;
+        border-radius: 5px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .import-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .import-table th {
+        background: #667eea;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .import-table td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .import-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .import-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-badge.success {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-badge.error {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .results-list {
+        background: white;
+        border-radius: 5px;
+        padding: 15px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .result-item {
+        padding: 15px;
+        margin-bottom: 10px;
+        background: #f8f9fa;
+        border-left: 4px solid #667eea;
+        border-radius: 5px;
+    }
+
+    .result-item h4 {
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .result-item p {
+        color: #666;
+        font-size: 13px;
+        margin: 3px 0;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: #999;
+        padding: 30px;
+        font-style: italic;
+    }
+
+    .search-container {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .search-container input {
+        flex: 1;
+    }
+
+    .alert {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
 </style>
 
+<!-- Inline JavaScript -->
 <script>
-    document.getElementById('demoForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const inputField = document.getElementById('inputField');
-        const validationMessage = document.getElementById('validationMessage');
-        validationMessage.innerText = '';
+    // Mock database of existing part numbers for duplicate checking
+    const mockDatabase = [
+        { partNumber: '11111111', location: 'Location 1', server: 'Primary' },
+        { partNumber: '22222222', location: 'Location 2', server: 'Primary' },
+        { partNumber: '33333333', location: 'Location 3', server: 'Secondary' },
+        { partNumber: '44444444', location: 'Location 1', server: 'Primary' },
+        { partNumber: '55555555', location: 'Location 3', server: 'Secondary' }
+    ];
 
-        // Real-time validation
-        if (inputField.value.trim() === '') {
-            validationMessage.innerText = 'Input cannot be empty.';
+    // Store added part numbers
+    let addedPartNumbers = [];
+
+    // Validate part number format
+    function validatePartNumber(partNumber) {
+        if (!partNumber || partNumber.length !== 8) {
+            return { valid: false, message: 'Part number must be exactly 8 digits' };
+        }
+        if (!/^\d{8}$/.test(partNumber)) {
+            return { valid: false, message: 'Part number must contain only digits' };
+        }
+        return { valid: true, message: 'Valid part number format' };
+    }
+
+    // Check for duplicates in mock database and added parts
+    function checkDuplicate(partNumber) {
+        // Check mock database
+        const existingInMock = mockDatabase.find(item => item.partNumber === partNumber);
+        if (existingInMock) {
+            return {
+                exists: true,
+                location: existingInMock.location,
+                server: existingInMock.server
+            };
+        }
+
+        // Check already added parts
+        const existingInAdded = addedPartNumbers.find(item => item.partNumber === partNumber);
+        if (existingInAdded) {
+            return {
+                exists: true,
+                location: existingInAdded.location,
+                server: 'Current Session'
+            };
+        }
+
+        return { exists: false, location: '', server: '' };
+    }
+
+    // Real-time validation for input field
+    const inputField = document.getElementById('inputField');
+    const validationIcon = document.getElementById('validationIcon');
+    const validationMessage = document.getElementById('validationMessage');
+
+    inputField.addEventListener('input', function() {
+        const value = this.value.trim();
+        
+        if (value === '') {
+            validationIcon.textContent = '';
+            validationMessage.textContent = '';
+            validationMessage.className = 'validation-message';
             return;
         }
 
-        // Simulated database interaction
-        const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML += `<p>${inputField.value}</p>`;
-        inputField.value = '';
+        const validation = validatePartNumber(value);
+        
+        if (validation.valid) {
+            const duplicate = checkDuplicate(value);
+            if (duplicate.exists) {
+                validationIcon.textContent = '❌';
+                validationMessage.textContent = `Duplicate! Already exists at ${duplicate.location} (${duplicate.server})`;
+                validationMessage.className = 'validation-message error';
+            } else {
+                validationIcon.textContent = '✓';
+                validationMessage.textContent = validation.message;
+                validationMessage.className = 'validation-message success';
+            }
+        } else {
+            validationIcon.textContent = '❌';
+            validationMessage.textContent = validation.message;
+            validationMessage.className = 'validation-message error';
+        }
     });
 
+    // Form submission
+    document.getElementById('demoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const partNumber = inputField.value.trim();
+        const description = document.getElementById('descriptionField').value.trim();
+        const location = document.getElementById('locationField').value;
+
+        // Validate
+        const validation = validatePartNumber(partNumber);
+        if (!validation.valid) {
+            showAlert('error', validation.message);
+            return;
+        }
+
+        // Check duplicate
+        const duplicate = checkDuplicate(partNumber);
+        if (duplicate.exists) {
+            showAlert('error', `Part number already exists at ${duplicate.location} (${duplicate.server})`);
+            return;
+        }
+
+        // Add to results
+        addedPartNumbers.push({
+            partNumber: partNumber,
+            description: description || 'No description',
+            location: location,
+            timestamp: new Date()
+        });
+
+        displayResults();
+        
+        // Clear form
+        inputField.value = '';
+        document.getElementById('descriptionField').value = '';
+        validationIcon.textContent = '';
+        validationMessage.textContent = '';
+        validationMessage.className = 'validation-message';
+
+        // Show success message
+        showAlert('success', `Part number ${partNumber} added successfully!`);
+    });
+
+    // Display results
+    function displayResults() {
+        const resultsDiv = document.getElementById('results');
+        
+        if (addedPartNumbers.length === 0) {
+            resultsDiv.innerHTML = '<p class="empty-state">No part numbers added yet.</p>';
+            return;
+        }
+
+        let html = '';
+        addedPartNumbers.forEach((item, index) => {
+            html += `
+                <div class="result-item">
+                    <h4>Part Number: ${item.partNumber}</h4>
+                    <p><strong>Description:</strong> ${item.description}</p>
+                    <p><strong>Location:</strong> ${item.location}</p>
+                    <p><strong>Added:</strong> ${item.timestamp.toLocaleString()}</p>
+                </div>
+            `;
+        });
+        
+        resultsDiv.innerHTML = html;
+    }
+
+    // Excel Import
     document.getElementById('importExcel').addEventListener('click', function() {
         document.getElementById('fileInput').click();
     });
 
-    document.getElementById('fileInput').addEventListener('change', function(event) {
+    document.getElementById('fileInput').addEventListener('change', async function(event) {
         const file = event.target.files[0];
-        // Simulate Excel import
-        if (file) {
-            alert('Excel import simulation for: ' + file.name);
+        if (!file) return;
+
+        // Show progress
+        const progressDiv = document.getElementById('importProgress');
+        const resultsDiv = document.getElementById('importResults');
+        progressDiv.style.display = 'flex';
+        resultsDiv.innerHTML = '';
+
+        try {
+            // Read the file
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            // Get first sheet
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+            // Process rows
+            const results = [];
+            let successCount = 0;
+            let errorCount = 0;
+
+            // Skip header row (row 0)
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                
+                // Skip empty rows
+                if (!row || row.length === 0 || !row[0]) continue;
+
+                const partNumber = String(row[0]).trim();
+                const description = row[1] ? String(row[1]).trim() : 'No description';
+                const location = row[2] ? String(row[2]).trim() : 'Location 1';
+
+                // Validate part number
+                const validation = validatePartNumber(partNumber);
+                if (!validation.valid) {
+                    results.push({
+                        partNumber: partNumber,
+                        description: description,
+                        location: location,
+                        status: 'Error',
+                        message: validation.message
+                    });
+                    errorCount++;
+                    continue;
+                }
+
+                // Check duplicate
+                const duplicate = checkDuplicate(partNumber);
+                if (duplicate.exists) {
+                    results.push({
+                        partNumber: partNumber,
+                        description: description,
+                        location: location,
+                        status: 'Error',
+                        message: `Already exists at ${duplicate.location}`
+                    });
+                    errorCount++;
+                    continue;
+                }
+
+                // Add to database
+                addedPartNumbers.push({
+                    partNumber: partNumber,
+                    description: description,
+                    location: location,
+                    timestamp: new Date()
+                });
+
+                results.push({
+                    partNumber: partNumber,
+                    description: description,
+                    location: location,
+                    status: 'Success',
+                    message: 'Imported successfully'
+                });
+                successCount++;
+            }
+
+            // Hide progress
+            progressDiv.style.display = 'none';
+
+            // Display results
+            displayImportResults(results, successCount, errorCount);
+            displayResults();
+
+        } catch (error) {
+            progressDiv.style.display = 'none';
+            showAlert('error', `Error reading Excel file: ${error.message}`);
         }
+
+        // Reset file input
+        event.target.value = '';
     });
 
+    // Display import results
+    function displayImportResults(results, successCount, errorCount) {
+        const resultsDiv = document.getElementById('importResults');
+        
+        let html = `
+            <div class="import-summary">
+                <h3>Import Summary</h3>
+                <div class="summary-stats">
+                    <div class="stat total">Total: ${results.length}</div>
+                    <div class="stat success">Success: ${successCount}</div>
+                    <div class="stat error">Errors: ${errorCount}</div>
+                </div>
+            </div>
+        `;
+
+        if (results.length > 0) {
+            html += `
+                <div class="import-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Part Number</th>
+                                <th>Description</th>
+                                <th>Location</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            results.forEach(item => {
+                const statusClass = item.status === 'Success' ? 'success' : 'error';
+                html += `
+                    <tr>
+                        <td>${item.partNumber}</td>
+                        <td>${item.description}</td>
+                        <td>${item.location}</td>
+                        <td>
+                            <span class="status-badge ${statusClass}">${item.message}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        resultsDiv.innerHTML = html;
+    }
+
+    // Search functionality
     document.getElementById('searchButton').addEventListener('click', function() {
-        const searchField = document.getElementById('searchField');
+        const searchTerm = document.getElementById('searchField').value.trim().toLowerCase();
         const searchResults = document.getElementById('searchResults');
-        searchResults.innerHTML = `<p>Searching for: ${searchField.value}</p>`;
+
+        if (!searchTerm) {
+            searchResults.innerHTML = '<p class="empty-state">Please enter a search term.</p>';
+            return;
+        }
+
+        // Search in added part numbers
+        const matches = addedPartNumbers.filter(item => {
+            return item.partNumber.toLowerCase().includes(searchTerm) ||
+                   item.description.toLowerCase().includes(searchTerm) ||
+                   item.location.toLowerCase().includes(searchTerm);
+        });
+
+        if (matches.length === 0) {
+            searchResults.innerHTML = '<p class="empty-state">No matches found.</p>';
+            return;
+        }
+
+        let html = '<div class="results-list">';
+        matches.forEach(item => {
+            html += `
+                <div class="result-item">
+                    <h4>Part Number: ${item.partNumber}</h4>
+                    <p><strong>Description:</strong> ${item.description}</p>
+                    <p><strong>Location:</strong> ${item.location}</p>
+                    <p><strong>Added:</strong> ${item.timestamp.toLocaleString()}</p>
+                </div>
+            `;
+        });
+        html += '</div>';
+
+        searchResults.innerHTML = html;
     });
+
+    // Show alert messages
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type}`;
+        alertDiv.textContent = message;
+        
+        const container = document.querySelector('.container');
+        container.insertBefore(alertDiv, container.firstChild);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    // Initialize
+    displayResults();
 </script>
