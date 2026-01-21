@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Part Number Sync System - Demo</title>
     <!-- SheetJS Library for Excel Import -->
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -343,7 +343,7 @@
             const partNumber = this.value.trim();
             
             if (partNumber === '') {
-                validationMessage.innerHTML = '';
+                validationMessage.textContent = '';
                 validationMessage.className = 'validation-message';
                 return;
             }
@@ -351,15 +351,15 @@
             const validation = validatePartNumber(partNumber);
             
             if (!validation.valid) {
-                validationMessage.innerHTML = '✗ ' + validation.message;
+                validationMessage.textContent = '✗ ' + validation.message;
                 validationMessage.className = 'validation-message error';
             } else {
                 const duplicate = checkDuplicate(partNumber);
                 if (duplicate.exists) {
-                    validationMessage.innerHTML = '❌ Part number already exists at ' + duplicate.location + ' on ' + duplicate.server + ' Server';
+                    validationMessage.textContent = '❌ Part number already exists at ' + duplicate.location + ' on ' + duplicate.server + ' Server';
                     validationMessage.className = 'validation-message duplicate';
                 } else {
-                    validationMessage.innerHTML = '✓ Part number is valid and available';
+                    validationMessage.textContent = '✓ Part number is valid and available';
                     validationMessage.className = 'validation-message valid';
                 }
             }
@@ -373,25 +373,27 @@
             const validation = validatePartNumber(partNumber);
             
             if (!validation.valid) {
-                validationMessage.innerHTML = '✗ ' + validation.message;
+                validationMessage.textContent = '✗ ' + validation.message;
                 validationMessage.className = 'validation-message error';
                 return;
             }
 
             const duplicate = checkDuplicate(partNumber);
             if (duplicate.exists) {
-                validationMessage.innerHTML = '❌ Cannot add: Part number already exists at ' + duplicate.location + ' on ' + duplicate.server + ' Server';
+                validationMessage.textContent = '❌ Cannot add: Part number already exists at ' + duplicate.location + ' on ' + duplicate.server + ' Server';
                 validationMessage.className = 'validation-message duplicate';
                 return;
             }
 
             // Add to results
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML += '<p>✓ Successfully added part number: ' + partNumber + '</p>';
+            const successParagraph = document.createElement('p');
+            successParagraph.textContent = '✓ Successfully added part number: ' + partNumber;
+            resultsDiv.appendChild(successParagraph);
             
             // Clear form
             inputField.value = '';
-            validationMessage.innerHTML = '';
+            validationMessage.textContent = '';
             validationMessage.className = 'validation-message';
         });
 
@@ -407,8 +409,8 @@
             
             // Show loading indicator
             const importButton = document.getElementById('importExcel');
-            const originalText = importButton.innerHTML;
-            importButton.innerHTML = 'Processing...<span class="loading"></span>';
+            const originalText = importButton.textContent;
+            importButton.textContent = 'Processing...';
             importButton.disabled = true;
             
             const reader = new FileReader();
@@ -424,7 +426,7 @@
                     alert('Error reading Excel file: ' + error.message);
                 } finally {
                     // Reset button
-                    importButton.innerHTML = originalText;
+                    importButton.textContent = originalText;
                     importButton.disabled = false;
                     // Reset file input
                     event.target.value = '';
@@ -492,16 +494,24 @@
             
             // Build table
             const tbody = document.getElementById('resultsTableBody');
-            tbody.innerHTML = '';
+            tbody.replaceChildren();  // Clear existing rows
             
             results.forEach(result => {
                 const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>${result.partNumber}</td>
-                    <td>${result.partType}</td>
-                    <td>${result.location}</td>
-                    <td class="status-${result.statusClass}">${result.status}</td>
-                `;
+                
+                // Create cells safely
+                const cell1 = row.insertCell(0);
+                cell1.textContent = result.partNumber;
+                
+                const cell2 = row.insertCell(1);
+                cell2.textContent = result.partType;
+                
+                const cell3 = row.insertCell(2);
+                cell3.textContent = result.location;
+                
+                const cell4 = row.insertCell(3);
+                cell4.textContent = result.status;
+                cell4.className = 'status-' + result.statusClass;
             });
             
             // Show results section
@@ -518,7 +528,9 @@
             const searchTerm = searchField.value.trim();
             
             if (searchTerm === '') {
-                searchResults.innerHTML = '<p>Please enter a search term</p>';
+                const emptyP = document.createElement('p');
+                emptyP.textContent = 'Please enter a search term';
+                searchResults.replaceChildren(emptyP);
                 return;
             }
             
@@ -532,15 +544,28 @@
                 const location = row.cells[2].textContent;
                 
                 if (partNumber.includes(searchTerm) || partType.toLowerCase().includes(searchTerm.toLowerCase()) || location.toLowerCase().includes(searchTerm.toLowerCase())) {
-                    matches.push(`Part Number: ${partNumber}, Type: ${partType}, Location: ${location}`);
+                    matches.push('Part Number: ' + partNumber + ', Type: ' + partType + ', Location: ' + location);
                 }
             });
             
             if (matches.length > 0) {
-                searchResults.innerHTML = '<p><strong>Found ' + matches.length + ' match(es):</strong></p>' + 
-                    matches.map(m => '<p>' + m + '</p>').join('');
+                // Create elements safely
+                const headerP = document.createElement('p');
+                const strong = document.createElement('strong');
+                strong.textContent = 'Found ' + matches.length + ' match(es):';
+                headerP.appendChild(strong);
+                
+                searchResults.replaceChildren(headerP);
+                
+                matches.forEach(m => {
+                    const matchP = document.createElement('p');
+                    matchP.textContent = m;
+                    searchResults.appendChild(matchP);
+                });
             } else {
-                searchResults.innerHTML = '<p>No results found for: ' + searchTerm + '</p>';
+                const noResultsP = document.createElement('p');
+                noResultsP.textContent = 'No results found for: ' + searchTerm;
+                searchResults.replaceChildren(noResultsP);
             }
         });
     </script>
